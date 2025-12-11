@@ -42,7 +42,7 @@ const getAll = async (req, res) => {
     }
     return res.status(200).json({ resp });
   } catch (error) {
-    return res.status(500).json({ message: "Server Error" });
+    return res.status(500).json({ message: error.message });
   }
 };
 
