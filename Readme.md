@@ -42,8 +42,8 @@ Configuration: Create a .env file in the backend/ root directory and add your Su
 
 Code snippet
 
-# NOTE: Use port 6543 (Transaction Mode) if you encounter connection issues
-DATABASE_URL="postgresql://postgres:[YOUR-PASSWORD]@db.xxxx.supabase.co:6543/postgres"
+# NOTE: use pooled connection if on ipv4 network.
+DATABASE_URL="postgresql://postgres:[YOUR-PASSWORD]@db.xxxx.supabase.co:6543/postgres" #direct connection
 PORT=5000
 Start the Server:
 
