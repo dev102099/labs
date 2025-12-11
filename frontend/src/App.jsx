@@ -28,7 +28,7 @@ function App() {
     form.append("file", fileName);
     try {
       const res = await fetch(
-        "https://labs-lilac-pi.vercel.app/api/documents/upload",
+        "https://labs-2lmy.onrender.com/api/documents/upload",
         {
           method: "POST",
 
@@ -49,7 +49,7 @@ function App() {
 
   const getAllDocs = async () => {
     try {
-      const res = await fetch("https://labs-lilac-pi.vercel.app/api/documents");
+      const res = await fetch("https://labs-2lmy.onrender.com/api/documents");
       const data = await res.json();
       if (data.status === 500) {
       }
@@ -62,7 +62,7 @@ function App() {
   const downlaodFile = async (id) => {
     try {
       window.open(
-        `https://labs-lilac-pi.vercel.app/api/documents/${id}`,
+        `https://labs-2lmy.onrender.com/api/documents/${id}`,
         "_blank"
       );
     } catch (error) {
@@ -75,7 +75,7 @@ function App() {
 
     try {
       const response = await fetch(
-        `https://labs-lilac-pi.vercel.app/api/documents/${id}`,
+        `https://labs-2lmy.onrender.com/api/documents/${id}`,
         {
           method: "DELETE",
         }
