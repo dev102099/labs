@@ -27,11 +27,14 @@ function App() {
     const form = new FormData();
     form.append("file", fileName);
     try {
-      const res = await fetch("http://localhost:3000/api/documents/upload", {
-        method: "POST",
+      const res = await fetch(
+        "https://labs-lilac-pi.vercel.app/api/documents/upload",
+        {
+          method: "POST",
 
-        body: form,
-      });
+          body: form,
+        }
+      );
       const data = await res.json();
       if (!data.document) {
         setError(data.message);
@@ -46,7 +49,7 @@ function App() {
 
   const getAllDocs = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/documents");
+      const res = await fetch("https://labs-lilac-pi.vercel.app/api/documents");
       const data = await res.json();
       if (data.status === 500) {
       }
@@ -58,7 +61,10 @@ function App() {
 
   const downlaodFile = async (id) => {
     try {
-      window.open(`http://localhost:3000/api/documents/${id}`, "_blank");
+      window.open(
+        `https://labs-lilac-pi.vercel.app/api/documents/${id}`,
+        "_blank"
+      );
     } catch (error) {
       console.log(error);
     }
@@ -69,7 +75,7 @@ function App() {
 
     try {
       const response = await fetch(
-        `http://localhost:3000/api/documents/${id}`,
+        `https://labs-lilac-pi.vercel.app/api/documents/${id}`,
         {
           method: "DELETE",
         }
