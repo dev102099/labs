@@ -124,7 +124,7 @@ function App() {
       <div className="bg-white w-full md:w-[70%] p-4 rounded-xl shadow">
         <h2 className="font-bold text-xl mb-3">Upload New Document</h2>
 
-        <div className="border-2 border-dashed border-gray-500 rounded-lg p-4 text-center flex flex-col gap-2">
+        <div className="border-2 border-dashed border-gray-500 bg-blue-300/80 rounded-lg p-4 text-center flex flex-col gap-2">
           <input
             ref={fileRef}
             type="file"
@@ -133,7 +133,7 @@ function App() {
             onChange={handleFileChange}
           />
 
-          <p>
+          <p className="">
             Drag & drop file or{" "}
             <span
               onClick={clickFile}
@@ -150,7 +150,7 @@ function App() {
 
         <button
           onClick={onSubmit}
-          className="mt-4 w-full bg-blue-700 text-white p-3 rounded-xl"
+          className="mt-4 w-full bg-blue-700 text-gray-400 cursor-pointer hover:text-white p-3 rounded-xl"
         >
           Submit
         </button>
