@@ -9,41 +9,47 @@ function App() {
   const [allDocs, setAllDocs] = useState([]);
 
   const fileRef = useRef(null);
-  const [fileName, setFileName] = useState("");
-  const clickFile = () => {
-    fileRef.current.click();
-  };
+  const [fileName, setFileName] = useState(null);
+
+  const clickFile = () => fileRef.current.click();
+
   const handleFileChange = (event) => {
     const file = event.target.files[0];
-    if (file) {
-      setFileName(file);
-    }
+    if (file) setFileName(file);
   };
+
   const onSubmit = async () => {
     if (!fileName) {
       alert("Please select a file first.");
       return;
     }
+
+    setError("");
+    setSuccess(false);
+
     const form = new FormData();
     form.append("file", fileName);
+
     try {
       const res = await fetch(
         "https://labs-2lmy.onrender.com/api/documents/upload",
         {
           method: "POST",
-
           body: form,
         }
       );
-      const data = await res.json();
-      if (!data.document) {
-        setError(data.message);
-      }
-      setSuccess(true);
-    } catch (error) {
-      setError(error.message);
 
-      console.log(error);
+      const data = await res.json();
+
+      if (!data.document) {
+        setError(data.message || "Upload failed");
+        return;
+      }
+
+      setSuccess(true);
+      setFileName(null);
+    } catch (err) {
+      setError(err.message);
     }
   };
 
@@ -51,68 +57,44 @@ function App() {
     try {
       const res = await fetch("https://labs-2lmy.onrender.com/api/documents");
       const data = await res.json();
-      if (data.status === 500) {
-      }
-      setAllDocs(data.resp);
-    } catch (error) {
-      console.log(error);
+      setAllDocs(data.resp || []);
+    } catch (err) {
+      console.error(err);
     }
   };
 
-  const downlaodFile = async (id) => {
-    try {
-      window.open(
-        `https://labs-2lmy.onrender.com/api/documents/${id}`,
-        "_blank"
-      );
-    } catch (error) {
-      console.log(error);
-    }
+  const downlaodFile = (id) => {
+    window.open(`https://labs-2lmy.onrender.com/api/documents/${id}`, "_blank");
   };
 
   const handleDelete = async (id) => {
     if (!confirm("Are you sure you want to delete this file?")) return;
 
     try {
-      const response = await fetch(
+      const res = await fetch(
         `https://labs-2lmy.onrender.com/api/documents/${id}`,
-        {
-          method: "DELETE",
-        }
+        { method: "DELETE" }
       );
 
-      if (response.ok) {
-        setAllDocs(allDocs.filter((doc) => doc.id !== id));
-        alert("File deleted");
-      } else {
-        alert("Failed to delete");
+      if (res.ok) {
+        setAllDocs((prev) => prev.filter((doc) => doc.id !== id));
       }
-    } catch (error) {
-      console.error("Error deleting:", error);
+    } catch (err) {
+      console.error(err);
     }
   };
 
   useEffect(() => {
     getAllDocs();
   }, [success]);
+
   useEffect(() => {
     if (success === true || error != "") {
       gsap.fromTo(
         ".message",
-        {
-          autoAlpha: 0,
-          y: 20,
-          display: "none",
-        },
-        {
-          duration: 1,
-          display: "flex",
-          autoAlpha: 1,
-          y: 0,
-          ease: "power3.out",
-        }
+        { autoAlpha: 0, y: 20, display: "none" },
+        { duration: 1, display: "flex", autoAlpha: 1, y: 0, ease: "power3.out" }
       );
-
       gsap.to(".message", {
         duration: 0.8,
         autoAlpha: 0,
@@ -124,108 +106,124 @@ function App() {
     }
   }, [success, error]);
 
-  function formatFileSize(bytes) {
-    if (bytes === 0) return "0 Bytes";
-
+  const formatFileSize = (bytes) => {
+    if (!bytes) return "0 Bytes";
     const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
-
+    const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-  }
+    return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`;
+  };
 
   return (
-    <>
-      <div className="h-screen w-screen bg-[#f3f3f3] gap-5 items-center p-3 flex flex-col">
-        <h1 className="font-bold text-4xl self-center mb-10">
-          Patient Portal - Document Management
-        </h1>
-        <div className="bg-[#ffffff] w-[70%] p-3 flex flex-col gap-3 shadow-sm ">
-          <h1 className="font-bold text-2xl">Upload New Document</h1>
-          <div className="bg-blue-400/30 text-black flex-col  flex border border-black border-dashed gap-2 p-5 justify-center items-center">
-            <div className="flex gap-1 justify-center items-center">
-              <span>Drag & Drop the file here or </span>{" "}
-              <input
-                ref={fileRef}
-                type="file"
-                placeholder="Choose here"
-                hidden
-                onChange={handleFileChange}
-                accept=".pdf"
-                className="text-blue-400 text-underline"
-              />
-              <span
-                onClick={clickFile}
-                className="text-blue-500 hover:underline cursor-pointer"
-              >
-                Click to browse
-              </span>
-            </div>
+    <div className="min-h-screen w-full bg-gray-100 p-3 flex flex-col items-center gap-6">
+      <h1 className="font-bold text-2xl md:text-4xl text-center">
+        Patient Portal – Document Management
+      </h1>
 
-            <span>{fileName.name}</span>
-            <img src="/upload.png" alt="logo" height={20} width={20} />
-          </div>
-          <button
-            onClick={onSubmit}
-            className="w-full bg-blue-800 hover:text-white p-3 rounded-2xl text-zinc-400"
-          >
-            Submit
-          </button>
-        </div>
-        <Dialogue success={success} />
+      {/* Upload Section */}
+      <div className="bg-white w-full md:w-[70%] p-4 rounded-xl shadow">
+        <h2 className="font-bold text-xl mb-3">Upload New Document</h2>
 
-        <div className="w-[70%] bg-white p-3 justify-center flex">
-          <table className="w-full ">
-            <tbody>
-              <tr>
-                <th className="text-left p-2 w-[50%]">Document Name</th>
-                <th className="text-left p-2 w-[20%]">Date Uploaded</th>
-                <th className="text-left p-2 w-[10%]">Size</th>
-                <th className="text-left p-2 w-[10%]"> Action</th>
-              </tr>
-              {allDocs.map((data, index) => (
-                <tr className="hover:bg-amber-200">
-                  <td className="border-t border-dashed border-gray-400 turncate p-1">
-                    {data.filename}
-                  </td>
-                  <td className="border-t border-dashed border-gray-400 p-1">
-                    {data.created_at}
-                  </td>
-                  <td className="border-t border-dashed border-gray-400 p-1">
-                    {formatFileSize(data.filesize)}
-                  </td>
-                  <td className="border-t border-dashed border-gray-400 p-1">
-                    <button
-                      onClick={() => downlaodFile(data.id)}
-                      className="p-2 bg-green-600 rounded-xl"
-                    >
-                      <img
-                        src="/download1.png"
-                        alt="logo"
-                        height={20}
-                        width={20}
-                      />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(data.id)}
-                      className="p-2 bg-red-700 rounded-xl ml-2"
-                    >
-                      <img
-                        src="/delete.png"
-                        alt="logo"
-                        height={20}
-                        width={20}
-                      />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="border-2 border-dashed border-gray-500 rounded-lg p-4 text-center flex flex-col gap-2">
+          <input
+            ref={fileRef}
+            type="file"
+            hidden
+            accept=".pdf"
+            onChange={handleFileChange}
+          />
+
+          <p>
+            Drag & drop file or{" "}
+            <span
+              onClick={clickFile}
+              className="text-blue-600 cursor-pointer underline"
+            >
+              browse
+            </span>
+          </p>
+
+          {fileName && <p className="text-sm break-all">{fileName.name}</p>}
+
+          <img src="/upload.png" alt="upload" className="mx-auto w-6" />
         </div>
-        {console.log(allDocs)}
+
+        <button
+          onClick={onSubmit}
+          className="mt-4 w-full bg-blue-700 text-white p-3 rounded-xl"
+        >
+          Submit
+        </button>
       </div>
-    </>
+
+      <Dialogue success={success} />
+
+      {/* Desktop Table */}
+      <div className="hidden md:block w-full md:w-[70%] bg-white rounded-xl shadow p-3">
+        <table className="w-full">
+          <thead>
+            <tr className="text-left border-b">
+              <th className="p-2">Document Name</th>
+              <th className="p-2">Date</th>
+              <th className="p-2">Size</th>
+              <th className="p-2">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {allDocs.map((doc) => (
+              <tr key={doc.id} className="hover:bg-gray-100">
+                <td className="p-2 break-all">{doc.filename}</td>
+                <td className="p-2">{doc.created_at}</td>
+                <td className="p-2">{formatFileSize(doc.filesize)}</td>
+                <td className="p-2 flex gap-2">
+                  <button
+                    onClick={() => downlaodFile(doc.id)}
+                    className="bg-green-600 p-2 rounded"
+                  >
+                    <img src="/download1.png" width={18} />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(doc.id)}
+                    className="bg-red-700 p-2 rounded"
+                  >
+                    <img src="/delete.png" width={18} />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Mobile Cards */}
+      <div className="md:hidden w-full flex flex-col gap-3">
+        {allDocs.map((doc) => (
+          <div key={doc.id} className="bg-white rounded-xl p-4 shadow">
+            <p className="font-semibold break-all">{doc.filename}</p>
+            <p className="text-sm text-gray-600 mt-1">
+              Uploaded: {doc.created_at}
+            </p>
+            <p className="text-sm mt-1">Size: {formatFileSize(doc.filesize)}</p>
+
+            <div className="flex gap-3 mt-3">
+              <button
+                onClick={() => downlaodFile(doc.id)}
+                className="flex-1 bg-green-600 p-2 rounded-xl flex justify-center"
+              >
+                <img src="/download1.png" width={20} />
+              </button>
+              <button
+                onClick={() => handleDelete(doc.id)}
+                className="flex-1 bg-red-700 p-2 rounded-xl flex justify-center"
+              >
+                <img src="/delete.png" width={20} />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
