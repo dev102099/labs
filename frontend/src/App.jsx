@@ -123,6 +123,17 @@ function App() {
       });
     }
   }, [success, error]);
+
+  function formatFileSize(bytes) {
+    if (bytes === 0) return "0 Bytes";
+
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  }
+
   return (
     <>
       <div className="h-screen w-screen bg-[#f3f3f3] gap-5 items-center p-3 flex flex-col">
