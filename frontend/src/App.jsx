@@ -181,7 +181,7 @@ function App() {
                     {data.created_at}
                   </td>
                   <td className="border-t border-dashed border-gray-400 p-1">
-                    {data.filesize}
+                    {formatFileSize(data.filesize)}
                   </td>
                   <td className="border-t border-dashed border-gray-400 p-1">
                     <button
